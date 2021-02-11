@@ -16,7 +16,7 @@ public class Main {
      public static void main(String[] args) {
 
            ArbolBinarioBusqueda<Integer,String> arbolPrueba = new ArbolBinarioBusqueda<>();
-           ArbolBinarioBusqueda<Integer,String> arbolAVL = new AVL<>();
+           AVL<Integer,String> arbolAVL = new AVL<>();
           
            arbolPrueba.insertar(50,"azul");
            arbolPrueba.insertar(78,"naranja");
@@ -105,7 +105,9 @@ public class Main {
         arbolPrueba3.insertar(24, "TV");
         ArbolBinarioBusqueda<Integer,String> arbolPrueba4 = new ArbolBinarioBusqueda<>(listClaveInOrden,listValorInOrden,listClavePreOrden,listValorPreOrden,false);
 
-
+//            System.out.println(arbolAVL.toString());
+//            System.out.println(arbolAVL.eliminar(40));
+//            System.out.println(arbolAVL.toString());
 //---------- PRACTICO #1 ----------------------------------------------------------
         // ejercicio1
         // todos los metodos implementados
@@ -115,6 +117,9 @@ public class Main {
         //    System.out.println(arbolPrueba.maximo());
         //ejercicio2
         //System.out.println(arbolPrueba.cantidadDeNodosQuetTieneSoloHijoIzquierdo());
+        // System.out.println(arbolPrueba.cantidadDeNodosQuetTieneSoloHijoIzquierdo);
+        
+        
         //ejercicio3
         // System.out.println(arbolPrueba.cantidadDeNodosQueSoloTienenHijoIzquierdoNoVacio());
         //ejercicio4
@@ -130,8 +135,10 @@ public class Main {
         //ejercicio9
         //System.out.println(arbolPrueba.cantidadDeHijosCompletoDebajoDelNivel(1));
         //ejercicio 10
-        //arbolPrueba.invertir();
-        //System.out.println(arbolPrueba);
+        System.out.println(arbolPrueba);
+
+        arbolPrueba.invertir();
+        System.out.println(arbolPrueba);
         //ejercicio11
         //System.out.println(arbolPrueba.ArbolCompleto());
         

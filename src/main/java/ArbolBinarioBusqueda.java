@@ -683,16 +683,45 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         } while (!colaDeNivel.isEmpty());
         return cantidadDeNodos;
     }
-    
+  // 3.1 Implemente un método iterativo que retorne la cantidad nodos que tienen solo hijo DERECHO no vacío en un árbol binario  
+    public int cantidadDeNodosQueSoloTienenHijoDerechoNoVacio() {
+        int cantidadDeNodos = 0;
+        int nivelActual = -1;
+        LinkedList<NodoBinario<K, V>> colaDeNivel = new LinkedList<>();
+        LinkedList<NodoBinario<K, V>> colaDeHijos = new LinkedList<>();
+        colaDeHijos.add(raiz);
+        NodoBinario<K, V> nodoActual = raiz;
+        do {
+            while (!colaDeNivel.isEmpty()) {
+                nodoActual = colaDeNivel.poll();
+                if (!nodoActual.esVacioHijoDerecho()) {
+                    colaDeHijos.offer(nodoActual.getHijoDerecho());
+                }
+                if (!nodoActual.esVacioHijoIzquierdo()) {
+                    colaDeHijos.offer(nodoActual.getHijoIzquierdo());
+                }
+            }
+            //cambio de nivel
+            nivelActual++;
+            while (!colaDeHijos.isEmpty()) {
+                NodoBinario<K, V> nodoEnElNivel = colaDeHijos.poll();
+                colaDeNivel.offer(nodoEnElNivel);
+                if (nodoEnElNivel.esVacioHijoIzquierdo() && !nodoEnElNivel.esVacioHijoDerecho()) {
+                    cantidadDeNodos++;
+                }
+            }
+        } while (!colaDeNivel.isEmpty());
+        return cantidadDeNodos;
+    }
   // 4.- Implemente un método recursivo que retorne la cantidad nodos que tienen solo hijo izquierdo no vacío
   //     en un árbol binario, pero solo en el nivel N
     
     
     public int cantidadDeHijosIzquierdoDebajoDelNivel(int i) {
-        return cantidadDeHijosDerechosDebajoDelNivel(i, this.raiz);
+        return cantidadDeHijosIzquierdoDebajoDelNivel(i, this.raiz);
     }
 
-    private int cantidadDeHijosDerechosDebajoDelNivel(int i,
+    private int cantidadDeHijosIzquierdoDebajoDelNivel(int i,
             NodoBinario<K,V> nodoActual) {
         if (!NodoBinario.esNodoVacio(nodoActual)) {
             int cant = 0;
@@ -701,8 +730,8 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
                     cant = 1;
             }
                 
-                cant = cant + cantidadDeHijosDerechosDebajoDelNivel(i, nodoActual.getHijoDerecho());
-                cant = cant + cantidadDeHijosDerechosDebajoDelNivel(i, nodoActual.getHijoIzquierdo());
+                cant = cant + cantidadDeHijosIzquierdoDebajoDelNivel(i, nodoActual.getHijoDerecho());
+                cant = cant + cantidadDeHijosIzquierdoDebajoDelNivel(i, nodoActual.getHijoIzquierdo());
                 return cant;
             
             
@@ -710,11 +739,59 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         }
         return 0;
     }
+    
+  // 4.1.- Implemente un método recursivo que retorne la cantidad nodos que tienen solo hijo DERECHO no vacío
+  //       en un árbol binario, pero solo en el nivel N
+    public int cantidadDeHijosDerechoDebajoDelNivel(int i) {
+        return cantidadDeHijosDerechoDebajoDelNivel(i, this.raiz);
+    }
 
+    private int cantidadDeHijosDerechoDebajoDelNivel(int i,
+            NodoBinario<K,V> nodoActual) {
+        if (!NodoBinario.esNodoVacio(nodoActual)) {
+            int cant = 0;
+            if ((nivelDelNodoEnArbol(nodoActual) >= i) && (nivelDelNodoEnArbol(nodoActual) <= i) && 
+                (NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo()))&& !(NodoBinario.esNodoVacio(nodoActual.getHijoDerecho()))) {
+                    cant = 1;
+            }
+                
+                cant = cant + cantidadDeHijosDerechoDebajoDelNivel(i, nodoActual.getHijoDerecho());
+                cant = cant + cantidadDeHijosDerechoDebajoDelNivel(i, nodoActual.getHijoIzquierdo());
+                return cant;
+            
+            
+            
+        }
+        return 0;
+    }
   // 5.- Implemente un método iterativo que retorne la cantidad nodos que tienen solo hijo izquierdo no vacío 
     //   en un árbol binario, pero solo después del nivel N  
     
    public int cantidadDeHijosIzquierdoDebajoDelNivelIterativo(int nivel) {
+        if (esArbolVacio()) {
+            return 0;
+        }
+        Queue<NodoBinario<K,V>> cola = new LinkedList<>();
+        int cant = 0;
+        NodoBinario<K,V> nodoActual = this.raiz;
+        cola.offer(nodoActual);
+        while(!cola.isEmpty()) {
+            nodoActual = cola.poll();
+            if (!NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo())) {
+                if (nivelDelNodoEnArbol(nodoActual) >= nivel) {
+                    cant++;
+                }
+                cola.offer(nodoActual.getHijoIzquierdo());
+            }
+            if (NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
+                cola.offer(nodoActual.getHijoDerecho());
+            }
+        }
+        return cant;
+    }
+  // 5.1 - Implemente un método iterativo que retorne la cantidad nodos que tienen solo hijo DERECHO no vacío 
+  //       en un árbol binario, pero solo después del nivel N     
+   public int cantidadDeHijosDerechoDebajoDelNivelIterativo(int nivel) {
         if (esArbolVacio()) {
             return 0;
         }
@@ -750,14 +827,14 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         cola.offer(nodoActual);
         while(!cola.isEmpty()) {
             nodoActual = cola.poll();
-            if (!NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo())&&NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
+            if (NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo())&& !NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
                 if (nivelDelNodoEnArbol(nodoActual) < nivel) {
                     cant++;
                 }
-                cola.offer(nodoActual.getHijoIzquierdo());
-            }
-            if (!NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
                 cola.offer(nodoActual.getHijoDerecho());
+            }
+            if (!NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo())) {
+                cola.offer(nodoActual.getHijoIzquierdo());
             }
         }
         return cant;
