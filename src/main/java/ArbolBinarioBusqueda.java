@@ -142,7 +142,7 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
     public boolean esArbolVacio() {
         return NodoBinario.esNodoVacio(this.raiz);
     }
-// TAMAÑO DE LA LISTA
+// TAMAÑO DE LA LISTA SIZE ITERATIVO
     @Override
     public int size() {       
         if (this.esArbolVacio()){
@@ -165,6 +165,19 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
            
         }
         return cantidadDeNodos;
+    }
+    //  SIZE RECURSIVO
+    public int sizeRec() {
+        return sizeRec(this.raiz);
+    }
+
+    protected int sizeRec(NodoBinario<K,V> nodoActual) {
+        if (NodoBinario.esNodoVacio(nodoActual)) {
+            return 0;
+        }
+        int cantAIzq = sizeRec(nodoActual.getHijoIzquierdo());
+        int cantADer = sizeRec(nodoActual.getHijoDerecho());
+        return cantAIzq + cantADer + 1;
     }
 // cantidad de hijos derechos
     public int cantidadHijosDerechos() {
@@ -380,7 +393,7 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         insertarR(nuevoNodoRaiz, claveAInsertar, valorAInsertar);
     }
     
-// ELIMINAR 
+// ELIMINAR RECURSIVO
     @Override
     public V eliminar(K claveAEliminar) {
         if (claveAEliminar == null) {
@@ -439,7 +452,119 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         return nodoAnterior;
     
     }
-    
+//  ELIMINAR ITERATIVO
+    public boolean eliminarIterativo(K dato) {
+        if (esArbolVacio()) {
+            return false;
+        }
+        Stack<NodoBinario<K,V>> pila = new Stack<>();
+        NodoBinario<K,V> nodoActual = this.raiz;
+        boolean datoEncontrado = false;
+        while ((!NodoBinario.esNodoVacio(nodoActual)) && !datoEncontrado) {
+            if (dato.compareTo(nodoActual.getClave()) > 0) {
+                pila.push(nodoActual);
+                nodoActual = nodoActual.getHijoDerecho();
+            }
+            if (dato.compareTo(nodoActual.getClave()) < 0) {
+                pila.push(nodoActual);
+                nodoActual = nodoActual.getHijoIzquierdo();
+            }
+            if (dato.compareTo(nodoActual.getClave()) == 0) {
+                datoEncontrado = true;
+            }
+        }
+
+        if (datoEncontrado) {
+            //Caso 1
+            if (esNodoHoja(nodoActual)) {
+                nodoActual = pila.pop();
+                if (dato.compareTo(nodoActual.getClave()) < 0) {
+                    nodoActual.setHijoIzquierdo(null);
+                } else {
+                    nodoActual.setHijoDerecho(null);
+                }
+                return true;
+            }
+            //Caso 2
+            if (NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo())
+                    && !NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
+                NodoBinario<K,V> nodoPadreDelActual = pila.pop();
+                if (dato.compareTo(nodoPadreDelActual.getClave()) < 0) {
+                    nodoPadreDelActual.setHijoIzquierdo(nodoActual.getHijoDerecho());
+                    nodoActual.setHijoDerecho(null);
+                } else {
+                    nodoPadreDelActual.setHijoDerecho(nodoActual.getHijoDerecho());
+                    nodoActual.setHijoDerecho(null);
+                }
+                return true;
+            }
+            if (!NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo())
+                    && NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
+                NodoBinario<K,V> nodoPadreDelActual = pila.pop();
+                if (dato.compareTo(nodoPadreDelActual.getClave()) < 0) {
+                    nodoPadreDelActual.setHijoIzquierdo(nodoActual.getHijoIzquierdo());
+                    nodoActual.setHijoIzquierdo(null);
+                } else {
+                    nodoPadreDelActual.setHijoDerecho(nodoActual.getHijoIzquierdo());
+                    nodoActual.setHijoIzquierdo(null);
+                }
+                return true;
+            }
+            //Caso 3
+            pila.clear();
+            pila.push(nodoActual);
+            K datoSucesor = buscarSucesorInOrdenParaIterativo(nodoActual.getHijoDerecho(), pila);
+            //nodoActual.setDato(datoSucesor);
+            NodoBinario<K,V> nuevoNodoAEliminar = pila.pop();
+
+            //Caso 1 del Caso 3
+            if (esNodoHoja(nuevoNodoAEliminar)) {
+                NodoBinario<K,V> nodoPadreDelNuevoNodoAEliminar = pila.pop();
+                if (datoSucesor.compareTo(nodoPadreDelNuevoNodoAEliminar.getClave()) < 0) {
+                    nodoPadreDelNuevoNodoAEliminar.setHijoIzquierdo(null);
+                } else {
+                    nodoPadreDelNuevoNodoAEliminar.setHijoDerecho(null);
+                }
+            }
+            //Caso 2 del Caso 3
+            if (NodoBinario.esNodoVacio(nuevoNodoAEliminar.getHijoIzquierdo())
+                    && !NodoBinario.esNodoVacio(nuevoNodoAEliminar.getHijoDerecho())) {
+                NodoBinario<K,V> nodoPadreDelNuevoNodoAEliminar = pila.pop();
+                if (datoSucesor.compareTo(nodoPadreDelNuevoNodoAEliminar.getClave()) < 0) {
+                    nodoPadreDelNuevoNodoAEliminar.setHijoIzquierdo(nuevoNodoAEliminar.getHijoDerecho());
+                    nuevoNodoAEliminar.setHijoDerecho(null);
+                } else {
+                    nodoPadreDelNuevoNodoAEliminar.setHijoDerecho(nuevoNodoAEliminar.getHijoDerecho());
+                    nuevoNodoAEliminar.setHijoDerecho(null);
+                }
+            }
+            if (!NodoBinario.esNodoVacio(nuevoNodoAEliminar.getHijoIzquierdo())
+                    && NodoBinario.esNodoVacio(nuevoNodoAEliminar.getHijoDerecho())) {
+                NodoBinario<K,V> nodoPadreDelNuevoNodoAEliminar = pila.pop();
+                if (dato.compareTo(nodoPadreDelNuevoNodoAEliminar.getClave()) < 0) {
+                    nodoPadreDelNuevoNodoAEliminar.setHijoIzquierdo(nuevoNodoAEliminar.getHijoIzquierdo());
+                    nuevoNodoAEliminar.setHijoIzquierdo(null);
+                } else {
+                    nodoPadreDelNuevoNodoAEliminar.setHijoDerecho(nuevoNodoAEliminar.getHijoIzquierdo());
+                    nuevoNodoAEliminar.setHijoIzquierdo(null);
+                }
+            }
+            nodoActual.setClave(datoSucesor);
+            return true;
+        }
+        return false;
+    }
+    private boolean esNodoHoja(NodoBinario<K,V> unNodo) {
+        return NodoBinario.esNodoVacio(unNodo.getHijoIzquierdo())
+                && NodoBinario.esNodoVacio(unNodo.getHijoDerecho());
+    }
+    private K buscarSucesorInOrdenParaIterativo(NodoBinario<K,V> nodo, Stack<NodoBinario<K,V>> pila) {
+        while (!NodoBinario.esNodoVacio(nodo)) {
+            pila.push(nodo);
+            nodo = nodo.getHijoIzquierdo();
+        }
+        return pila.peek().getClave();
+    }
 // ¿CONTIENE CLAVE?
     @Override
     public boolean contiene (K clave) {
@@ -498,7 +623,30 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
             recorridoEnInOrden(nodoActual.getHijoDerecho(), recorrido);
         }
     }
-    
+// RECORRIDO EN INORDEN ITERATIVO
+public List<K> recorridoEnInOrdenIterativo() {
+        List<K> recorrido = new ArrayList<>();
+        if (esArbolVacio()) {
+            return recorrido;
+        }
+        Stack<NodoBinario<K,V>> pila = new Stack();
+        NodoBinario<K,V> nodoActual = this.raiz;
+        meterEnPilaParaInOrden(pila, nodoActual);
+        while (!pila.empty()) {
+            nodoActual = pila.pop();
+            recorrido.add(nodoActual.getClave());
+            if (!NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
+                meterEnPilaParaInOrden(pila, nodoActual.getHijoDerecho());
+            }
+        }
+        return recorrido;
+    }  
+    private void meterEnPilaParaInOrden(Stack<NodoBinario<K,V>> pila, NodoBinario<K,V> nodoActual) {
+        while (!NodoBinario.esNodoVacio(nodoActual)) {
+            pila.push(nodoActual);
+            nodoActual = nodoActual.getHijoIzquierdo();
+        }
+    }
 //RECORRIDO EN PREORDEN ITERATIVO
     @Override
     public List<K> recorridoEnPreOrden() {
@@ -526,7 +674,20 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         return recorrido;
     }
 
-   
+//RECORRIDO EN PREORDEN RECURSIVO
+     public List<K> recorridoEnPreOrdenRec() {
+        List<K> recorrido = new ArrayList<>();
+        recorridoEnPreOrdenRec(this.raiz, recorrido);
+        return recorrido;
+    }
+
+    private void recorridoEnPreOrdenRec(NodoBinario<K,V> nodoActual, List<K> recorrido) {
+        if (!NodoBinario.esNodoVacio(nodoActual)) {
+            recorrido.add(nodoActual.getClave());
+            recorridoEnPreOrdenRec(nodoActual.getHijoIzquierdo(), recorrido);
+            recorridoEnPreOrdenRec(nodoActual.getHijoDerecho(), recorrido); 
+        }
+    }
     
 //RECORRIDO EN POSTORDEN ITERATIVO
      @Override
@@ -608,6 +769,7 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         }
         return recorrido;
     }
+// RECORRIDO POR NIVELES Recursivo
 
     @Override
     public String toString() {
@@ -859,63 +1021,64 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         return esSimilar(raizA.getHijoIzquierdo(), raizB.getHijoIzquierdo())
                 && esSimilar(raizA.getHijoDerecho(), raizB.getHijoDerecho());
     }
-    public int cantHijosEnNivelN(int n) {
-        int nivelActual = 0;
-        int cantHijos = 0;
-        LinkedList<NodoBinario<K,V>> colaDeNivel = new LinkedList<>();
-        colaDeNivel.add(raiz);
-        NodoBinario<K,V> nodoActual = raiz;
-        if (n == 0) {
-            if (nodoActual.esHoja()) {
-                return 1;
-            }
-        }
-        do {
-            LinkedList<NodoBinario<K,V>> colaDeHijos = new LinkedList<>();
-            
-            while (!colaDeNivel.isEmpty()) {
-                
-                nodoActual = colaDeNivel.poll(); 
-                
-                //COLA_DE_NIVEL = [ ]
-                
-                //COLA_DE_HIJOS = [ G, H, F, ]
-                
-                // NODO_ACTUAL = F
-                
-                if (!nodoActual.esVacioHijoIzquierdo()) {
-                    colaDeHijos.offer(nodoActual.getHijoIzquierdo());
-                }
-                if (!nodoActual.esVacioHijoDerecho()) {
-                    colaDeHijos.offer(nodoActual.getHijoDerecho());
-                }
-            }
-            
-         
-            //cambio de nivel
-            nivelActual++;
-            if (nivelActual == n) {
-                while (!colaDeHijos.isEmpty()) {
-                    NodoBinario<K,V> nodoEnElNivel = colaDeHijos.poll();
-                    if (nodoEnElNivel.esHoja()) {
-                        cantHijos++;
-                    }
-                }
-                return cantHijos;
-            }
-               
-            
-            while (!colaDeHijos.isEmpty()) {
-                
-                //COLA_DE_NIVEL = [ D, E, F]
-                
-                //COLA_DE_HIJOS = [  ]
-                
-                colaDeNivel.offer(colaDeHijos.poll());
-            }
-        } while (!colaDeNivel.isEmpty());
-        return cantHijos;
-    }
+    // cantidad de hijos en un nivel 
+//    public int cantHijosEnNivelN(int n) {
+//        int nivelActual = 0;
+//        int cantHijos = 0;
+//        LinkedList<NodoBinario<K,V>> colaDeNivel = new LinkedList<>();
+//        colaDeNivel.add(raiz);
+//        NodoBinario<K,V> nodoActual = raiz;
+//        if (n == 0) {
+//            if (nodoActual.esHoja()) {
+//                return 1;
+//            }
+//        }
+//        do {
+//            LinkedList<NodoBinario<K,V>> colaDeHijos = new LinkedList<>();
+//            
+//            while (!colaDeNivel.isEmpty()) {
+//                
+//                nodoActual = colaDeNivel.poll(); 
+//                
+//                //COLA_DE_NIVEL = [ ]
+//                
+//                //COLA_DE_HIJOS = [ G, H, F, ]
+//                
+//                // NODO_ACTUAL = F
+//                
+//                if (!nodoActual.esVacioHijoIzquierdo()) {
+//                    colaDeHijos.offer(nodoActual.getHijoIzquierdo());
+//                }
+//                if (!nodoActual.esVacioHijoDerecho()) {
+//                    colaDeHijos.offer(nodoActual.getHijoDerecho());
+//                }
+//            }
+//            
+//         
+//            //cambio de nivel
+//            nivelActual++;
+//            if (nivelActual == n) {
+//                while (!colaDeHijos.isEmpty()) {
+//                    NodoBinario<K,V> nodoEnElNivel = colaDeHijos.poll();
+//                    if (nodoEnElNivel.esHoja()) {
+//                        cantHijos++;
+//                    }
+//                }
+//                return cantHijos;
+//            }
+//               
+//            
+//            while (!colaDeHijos.isEmpty()) {
+//                
+//                //COLA_DE_NIVEL = [ D, E, F]
+//                
+//                //COLA_DE_HIJOS = [  ]
+//                
+//                colaDeNivel.offer(colaDeHijos.poll());
+//            }
+//        } while (!colaDeNivel.isEmpty());
+//        return cantHijos;
+//    }
     
     //9. Para un árbol binario implemente un método que retorne la cantidad de nodos que tienen ambos hijos desde el nivel N.
     
@@ -967,6 +1130,205 @@ public class ArbolBinarioBusqueda<K extends Comparable<K>,V>
         }
     return b;
 }
+    //12.- Muestra el nivel de la moyor clave insertada de manera RECURSIVA (ARBOL BINARIO ORDENADO)
+    
+    public int nivelDelDatoMayorDeArbolBinarioOrdenado() {
+        return nivelDelDatoMayorDeArbolBinarioOrdenado(this.raiz);
+    }
+
+    private int nivelDelDatoMayorDeArbolBinarioOrdenado(NodoBinario<K,V> nodoActual) {
+        if (NodoBinario.esNodoVacio(nodoActual)) {
+            return - 1;
+        } else {
+            return nivelDelDatoMayorDeArbolBinarioOrdenado(nodoActual.getHijoDerecho()) + 1;
+        }
+    }
+    
+     //13.- Muestra el nivel de la moyor clave insertada de manera ITERATIVA (ARBOL BINARIO ORDENADO)
+    public int nivelDelDatoMayorDeArbolBinarioOrdenadoV2() {
+        NodoBinario<K,V> nodoActual = this.raiz;
+        int nivel = -1;
+        while (!NodoBinario.esNodoVacio(nodoActual)) {
+            nodoActual = nodoActual.getHijoDerecho();
+            nivel++;
+        }
+        return nivel;
+    }
+    //14.- Muestra el nivel de la moyor clave insertada de manera ITERATIVA (ARBOL BINARIO DESORDENADO)
+     public int nivelDelDatoMayorDeArbolDesordenado() {
+        NodoBinario<K,V> nodoActual = this.raiz;
+        NodoBinario<K,V> nodoConDatoMayor = null;
+        int nivel = - 1;
+        Queue<NodoBinario<K,V>> cola = new LinkedList();
+        cola.offer(nodoActual);
+        while (!cola.isEmpty()) {
+            nodoActual = cola.poll();
+            if (!NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo())) {
+                cola.offer(nodoActual.getHijoIzquierdo());
+            }
+            if (!NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
+                cola.offer(nodoActual.getHijoDerecho());
+            }
+            if ((NodoBinario.esNodoVacio(nodoConDatoMayor))
+                    || (nodoConDatoMayor.getClave().compareTo(nodoActual.getClave()) < 0)) {
+                nodoConDatoMayor = nodoActual;
+            }
+        }
+        return nivelDelNodoEnArbolDesordenado(nodoConDatoMayor);
+    }
+    
+    private int nivelDelNodoEnArbolDesordenado(NodoBinario<K,V> nodoABuscar) {
+        List<K> recorridoPreOrden = new ArrayList<>();
+        recorridoPreOrden = recorridoEnPreOrden();
+        List<K> recorridoInOrden = new ArrayList<>();
+        recorridoInOrden = recorridoEnInOrden();
+        return nivelDelNodoEnArbolDesordenado(nodoABuscar.getClave(), 
+                recorridoPreOrden, recorridoInOrden);
+    }
+    private int nivelDelNodoEnArbolDesordenado(K datoABuscar, 
+            List<K> recorridoPreOrden, List<K> recorridoInOrden) {
+        if (recorridoInOrden.isEmpty()) {
+            return 0;
+        }
+        K primerDatoDePreOrden = recorridoPreOrden.get(0);        
+        if (primerDatoDePreOrden.compareTo(datoABuscar) != 0) {
+            int posicionDelDatoEnInOrden = buscarPosicionDatoEnInOrden(recorridoInOrden,
+                    primerDatoDePreOrden);
+            int posicionDatoABuscar = buscarPosicionDatoEnInOrden(recorridoInOrden, datoABuscar);
+            if (posicionDatoABuscar < posicionDelDatoEnInOrden) {
+                List<K> inOrdenIzquierda = recorridoInOrden.subList(0, posicionDelDatoEnInOrden);
+                List<K> preOrdenIzquierda = recorridoPreOrden.subList(1, posicionDelDatoEnInOrden + 1);
+                return nivelDelNodoEnArbolDesordenado(datoABuscar, preOrdenIzquierda, 
+                        inOrdenIzquierda) + 1;
+            } else{
+                List<K> inOrdenDerecha = recorridoInOrden.subList(posicionDelDatoEnInOrden + 1, 
+                        recorridoInOrden.size());
+                List<K> preOrdenDerecha = recorridoPreOrden.subList(posicionDelDatoEnInOrden + 1, 
+                        recorridoPreOrden.size());
+                return nivelDelNodoEnArbolDesordenado(datoABuscar, preOrdenDerecha, inOrdenDerecha) + 1;
+            }
+        }
+        return 0;
+    }
+     private int buscarPosicionDatoEnInOrden(List<K> recorridoEnInOrden, K datoABuscar) {
+        for (int i = 0; i < recorridoEnInOrden.size(); i++) {
+            K datoEnTurno = recorridoEnInOrden.get(i);
+            if (datoABuscar.compareTo(datoEnTurno) == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    // Cantidad de hijos derechos que hay en el arbol debajo de un nivel dado  RECURSIVO
+     
+      public int cantidadDeHijosDerechosDebajoDelNivel(int i) {
+        return cantidadDeHijosDerechosDebajoDelNivel(i, this.raiz);
+    }
+
+    private int cantidadDeHijosDerechosDebajoDelNivel(int i,
+            NodoBinario<K,V> nodoActual) {
+        if (!NodoBinario.esNodoVacio(nodoActual)) {
+            int cant = 0;
+            if ((nivelDelNodoEnArbol(nodoActual) >= i) && 
+                (!NodoBinario.esNodoVacio(nodoActual.getHijoDerecho()))) {
+                    cant = 1;
+            }
+            cant = cant + cantidadDeHijosDerechosDebajoDelNivel(i, nodoActual.getHijoDerecho());
+            cant = cant + cantidadDeHijosDerechosDebajoDelNivel(i, nodoActual.getHijoIzquierdo());
+            return cant;
+        }
+        return 0;
+    }
+    
+    // Cantidad de hijos derechos que hay en el arbol debajo de un nivel dado  ITERATIVO
+    
+    public int cantidadDeHijosDerechosDebajoDelNivelIterativo(int nivel) {
+        if (esArbolVacio()) {
+            return 0;
+        }
+        Queue<NodoBinario<K,V>> cola = new LinkedList<>();
+        int cant = 0;
+        NodoBinario<K,V> nodoActual = this.raiz;
+        cola.offer(nodoActual);
+        while(!cola.isEmpty()) {
+            nodoActual = cola.poll();
+            if (!NodoBinario.esNodoVacio(nodoActual.getHijoDerecho())) {
+                if (nivelDelNodoEnArbol(nodoActual) >= nivel) {
+                    cant++;
+                }
+                cola.offer(nodoActual.getHijoDerecho());
+            }
+            if (!NodoBinario.esNodoVacio(nodoActual.getHijoIzquierdo())) {
+                cola.offer(nodoActual.getHijoIzquierdo());
+            }
+        }
+        return cant;
+    }
+    //---------------
+     public boolean soloHojasEIncomp() {
+        return soloHojasEIncomp(raiz);
+    }
+
+    private boolean soloHojasEIncomp(NodoBinario<K,V> nodoActual) {
+//        if(NodoBinario.esNodoVacio(nodoActual)){
+//            return true;
+//        }
+        if (nodoActual.esHoja()) {
+            return true;
+        }
+        if (!nodoActual.esVacioHijoIzquierdo() && nodoActual.esVacioHijoDerecho()) {
+            return soloHojasEIncomp(nodoActual.getHijoIzquierdo());
+        }
+        if (nodoActual.esVacioHijoIzquierdo() && !nodoActual.esVacioHijoDerecho()) {
+            return soloHojasEIncomp(nodoActual.getHijoDerecho());
+        }
+        return false;
+    }
+    // aun no se lo que hace
+    public int cantHijosEnNivelN(int n) {
+        int nivelActual = 0;
+        int cantHijos = 0;
+        LinkedList<NodoBinario<K,V>> colaGlobal = new LinkedList<>();
+        LinkedList<NodoBinario<K,V>> colaDeNivel = new LinkedList<>();
+        colaGlobal.add(raiz);
+        colaDeNivel.add(raiz);
+        NodoBinario<K,V> nodoActual = raiz;
+        if (n == 0) {
+            if (nodoActual.esHoja()) {
+                return 1;
+            }
+        }
+        while (!colaGlobal.isEmpty()) {
+            LinkedList<NodoBinario<K,V>> colaAuxiliar = new LinkedList<>();
+            while (!colaDeNivel.isEmpty()) {
+                nodoActual = colaDeNivel.poll();
+                colaGlobal.remove();
+                if (!nodoActual.esVacioHijoIzquierdo()) {
+                    colaAuxiliar.offer(nodoActual.getHijoIzquierdo());
+                }
+                if (!nodoActual.esVacioHijoDerecho()) {
+                    colaAuxiliar.offer(nodoActual.getHijoDerecho());
+                }
+            }//cambio de nivel
+            nivelActual++;
+            if (nivelActual == n) {
+                LinkedList<NodoBinario<K,V>> colaDelNivel = colaAuxiliar;
+                while (!colaDelNivel.isEmpty()) {
+                    NodoBinario<K,V> nodoEnElNivel = colaDelNivel.poll();
+                    if (nodoEnElNivel.esHoja()) {
+                        cantHijos++;
+                    }
+                }
+                return cantHijos;
+            }
+            while (!colaAuxiliar.isEmpty()) {
+                nodoActual = colaAuxiliar.poll();
+                colaGlobal.offer(nodoActual);
+                colaDeNivel.offer(nodoActual);
+            }
+        }
+        return cantHijos;
+    }
 }    
 
    

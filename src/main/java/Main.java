@@ -136,9 +136,10 @@ public class Main {
         //System.out.println(arbolPrueba.cantidadDeHijosCompletoDebajoDelNivel(1));
         //ejercicio 10
         System.out.println(arbolPrueba);
-
-        arbolPrueba.invertir();
-        System.out.println(arbolPrueba);
+        System.out.println(arbolPrueba.recorridoPorNiveles());
+        System.out.println(arbolPrueba.cantHijosEnNivelN(1));
+//        arbolPrueba.invertir();
+//        System.out.println(arbolPrueba);
         //ejercicio11
         //System.out.println(arbolPrueba.ArbolCompleto());
         
